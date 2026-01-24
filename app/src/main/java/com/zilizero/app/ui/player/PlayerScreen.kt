@@ -103,11 +103,16 @@ fun PlayerScreen(
                             DanmakuSurfaceView(context).apply {
                                 // Important: Force danmaku to be on top of everything
                                 setZOrderMediaOverlay(true)
-                                setZOrderOnTop(true)
+                                // setZOrderOnTop(true) // Sometimes causes issues, try disabling
                                 holder.setFormat(android.graphics.PixelFormat.TRANSLUCENT)
+                                
+                                // DEBUG: Check if view is visible
+                                // this.setBackgroundColor(android.graphics.Color.parseColor("#33FF0000")) 
+
                                 setCallback(object : DrawHandler.Callback {
                                     override fun prepared() {
                                         start()
+                                        show() // Ensure it is shown
                                     }
                                     override fun updateTimer(timer: DanmakuTimer?) {}
                                     override fun danmakuShown(danmaku: BaseDanmaku?) {}
