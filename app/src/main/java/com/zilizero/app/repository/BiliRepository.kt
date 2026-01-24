@@ -35,8 +35,35 @@ class BiliRepository(
 
     suspend fun getRecommendFeed(): List<FeedItem> {
         return withContext(Dispatchers.IO) {
+            val mixinKey = ensureMixinKey()
+            val params = mapOf(
+                "ps" to "10",
+                "fresh_type" to "3"
+            )
+            val signedParams = WbiUtil.signParams(params, mixinKey)
+            
             // Passing default params explicitly to avoid compiler issues with Retrofit defaults
-            val responseBody = api.getRecommendFeed(pageSize = 10, freshType = 3, signedParams = emptyMap())
+            // Note: signedParams already contains 'wts' and 'w_rid', and we don't need to pass ps/fresh_type again in Query args if we put them in QueryMap, 
+            // BUT BilibiliApi definition has fixed params.
+            // Actually, we should pass the signedParams map which CONTAINS w_rid and wts.
+            // The fixed params (ps, fresh_type) will be added by Retrofit as Query params.
+            // We need to make sure we don't duplicate them or miss them in signature.
+            // WbiUtil.signParams returns a map with ALL params (including ps, fresh_type, wts, w_rid).
+            // So we should just pass the EXTRA params (wts, w_rid) to the QueryMap, OR change API to use QueryMap for everything.
+            
+            // Current API: getRecommendFeed(ps, fresh_type, signedParams)
+            // If we pass 'ps' and 'fresh_type' as arguments, Retrofit adds them.
+            // signedParams map SHOULD ONLY contain 'wts' and 'w_rid' then? 
+            // NO. Wbi signature requires ALL params to be sorted and hashed.
+            // But when sending request, if we send 'ps' twice (once from arg, once from map), it might be an issue.
+            
+            // Strategy: Extract only wts and w_rid from the signed map to pass to the QueryMap.
+            val wbiAuthParams = mapOf(
+                "wts" to signedParams["wts"]!!,
+                "w_rid" to signedParams["w_rid"]!!
+            )
+            
+            val responseBody = api.getRecommendFeed(pageSize = 10, freshType = 3, signedParams = wbiAuthParams)
             val jsonString = responseBody.string()
 
             try {
@@ -62,11 +89,19 @@ class BiliRepository(
                 "cid" to cid.toString(),
                 "qn" to "80",
                 "fnval" to "4048",
+                "fnver" to "0",
                 "fourk" to "1"
             )
             
             val signedParams = WbiUtil.signParams(params, mixinKey)
-            val response = api.getPlayUrl(bvid, cid, signedParams = signedParams)
+            
+            // Similarly, extract only auth params for the QueryMap, as other params are passed as args
+            val wbiAuthParams = mapOf(
+                "wts" to signedParams["wts"]!!,
+                "w_rid" to signedParams["w_rid"]!!
+            )
+            
+            val response = api.getPlayUrl(bvid, cid, signedParams = wbiAuthParams)
             
             if (response.code != 0) {
                 throw Exception("Bili Error: ${response.message}")
