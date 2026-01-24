@@ -13,6 +13,8 @@ import com.google.gson.reflect.TypeToken
 import com.zilizero.app.network.BiliResponse
 import com.zilizero.app.network.FeedResponse
 
+import com.zilizero.app.network.PlayUrlResponse
+
 class BiliRepository(
     private val api: BilibiliApi = NetworkClient.api
 ) {
@@ -79,10 +81,6 @@ class BiliRepository(
             }
         }
     }
-
-import com.zilizero.app.network.PlayUrlResponse
-
-// ... (inside BiliRepository)
 
     suspend fun getPlayUrl(bvid: String, cid: Long): DashInfo {
         return withContext(Dispatchers.IO) {
