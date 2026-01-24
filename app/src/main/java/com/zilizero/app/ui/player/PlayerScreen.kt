@@ -113,7 +113,7 @@ fun PlayerScreen(
                                 if (view.isPaused) view.resume()
                                 // Simple sync mechanism: seek if drift is large
                                 val diff = view.currentTime - player.currentPosition
-                                if (Math.abs(diff) > 1000) {
+                                if (kotlin.math.abs(diff) > 1000) {
                                     view.seekTo(player.currentPosition)
                                 }
                             } else {

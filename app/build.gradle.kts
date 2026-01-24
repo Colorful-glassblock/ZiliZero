@@ -108,6 +108,16 @@ protobuf {
         implementation(libs.androidx.tv.material)
         implementation(libs.androidx.lifecycle.viewmodel.compose)
         
+        // Media3 (ExoPlayer)
+        implementation(libs.androidx.media3.exoplayer)
+        implementation(libs.androidx.media3.datasource)
+        implementation(libs.androidx.media3.ui)
+
+        // Network
+        implementation(libs.retrofit)
+        implementation(libs.retrofit.converter.gson)
+        // Note: retrofit-converter-protobuf is not used yet or conflicts, skipping for now unless needed.
+
         // Image Loading
         implementation(libs.glide)
         implementation(libs.coil.compose)
