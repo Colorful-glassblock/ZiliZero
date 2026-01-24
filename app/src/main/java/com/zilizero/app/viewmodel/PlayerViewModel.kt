@@ -36,12 +36,22 @@ class PlayerViewModel(
     private val _danmakuParser = MutableStateFlow<com.zilizero.app.ui.player.DanmakuParser?>(null)
     val danmakuParser: StateFlow<com.zilizero.app.ui.player.DanmakuParser?> = _danmakuParser.asStateFlow()
 
-    val player: ExoPlayer = ExoPlayer.Builder(application).build()
+    var player: ExoPlayer? = null
+        private set
+
+    fun initializePlayer() {
+        if (player == null) {
+            player = ExoPlayer.Builder(getApplication()).build()
+        }
+    }
 
     fun loadVideo(bvid: String, cid: Long) {
-        // Stop previous playback if any
-        player.stop()
-        player.clearMediaItems()
+        // Ensure player exists
+        if (player == null) initializePlayer()
+        
+        val exoPlayer = player!!
+        exoPlayer.stop()
+        exoPlayer.clearMediaItems()
         
         viewModelScope.launch {
             _uiState.value = PlayerUiState.Loading
@@ -85,9 +95,11 @@ class PlayerViewModel(
 
         val mergingSource = MergingMediaSource(true, videoSource, audioSource)
 
-        player.setMediaSource(mergingSource)
-        player.prepare()
-        player.playWhenReady = true
+        player?.let { p ->
+            p.setMediaSource(mergingSource)
+            p.prepare()
+            p.playWhenReady = true
+        }
     }
 
     override fun onCleared() {
@@ -96,6 +108,7 @@ class PlayerViewModel(
     }
 
     fun releasePlayer() {
-        player.release()
+        player?.release()
+        player = null
     }
 }

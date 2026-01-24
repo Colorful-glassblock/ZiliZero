@@ -60,6 +60,7 @@ fun PlayerScreen(
     }
 
     LaunchedEffect(bvid, cid) {
+        viewModel.initializePlayer()
         viewModel.loadVideo(bvid, cid)
     }
 
@@ -113,15 +114,17 @@ fun PlayerScreen(
                         update = { view ->
                             // Sync logic: Pass player position to DanmakuView
                             val player = viewModel.player
-                            if (player.isPlaying) {
-                                if (view.isPaused) view.resume()
-                                // Simple sync mechanism: seek if drift is large
-                                val diff = view.currentTime - player.currentPosition
-                                if (kotlin.math.abs(diff) > 1000) {
-                                    view.seekTo(player.currentPosition)
+                            if (player != null) {
+                                if (player.isPlaying) {
+                                    if (view.isPaused) view.resume()
+                                    // Simple sync mechanism: seek if drift is large
+                                    val diff = view.currentTime - player.currentPosition
+                                    if (kotlin.math.abs(diff) > 1000) {
+                                        view.seekTo(player.currentPosition)
+                                    }
+                                } else {
+                                    if (!view.isPaused) view.pause()
                                 }
-                            } else {
-                                if (!view.isPaused) view.pause()
                             }
                         },
                         modifier = Modifier.fillMaxSize()
@@ -134,8 +137,7 @@ fun PlayerScreen(
     // Handle back press to release player early or navigate back
     DisposableEffect(Unit) {
         onDispose {
-            viewModel.player.stop()
-            viewModel.player.clearMediaItems()
+            viewModel.releasePlayer()
         }
     }
 }
