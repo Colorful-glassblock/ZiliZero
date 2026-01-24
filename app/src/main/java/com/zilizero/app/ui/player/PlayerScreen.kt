@@ -134,7 +134,8 @@ fun PlayerScreen(
     // Handle back press to release player early or navigate back
     DisposableEffect(Unit) {
         onDispose {
-            // Player is released in ViewModel.onCleared()
+            viewModel.player.stop()
+            viewModel.player.clearMediaItems()
         }
     }
 }

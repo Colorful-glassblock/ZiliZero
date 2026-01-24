@@ -39,8 +39,13 @@ class PlayerViewModel(
     val player: ExoPlayer = ExoPlayer.Builder(application).build()
 
     fun loadVideo(bvid: String, cid: Long) {
+        // Stop previous playback if any
+        player.stop()
+        player.clearMediaItems()
+        
         viewModelScope.launch {
             _uiState.value = PlayerUiState.Loading
+            _danmakuParser.value = null // Reset danmaku
             try {
                 // Parallel fetch
                 val dashDeferred = async { repository.getPlayUrl(bvid, cid) }
@@ -87,6 +92,10 @@ class PlayerViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        releasePlayer()
+    }
+
+    fun releasePlayer() {
         player.release()
     }
 }
