@@ -32,7 +32,7 @@ object GrpcMetadataUtil {
      * Generates a standard BiliDroid User-Agent.
      * Required for gRPC consistency.
      */
-    fun generateUserAgent(buvid: String): String {
+    fun generateUserAgent(): String {
         return "Mozilla/5.0 BiliDroid/${BiliConfig.VERSION_NAME} (bbcallen@gmail.com) " +
                 "os/android model/ZiliZero mobi_app/${BiliConfig.MOBI_APP} " +
                 "build/${BiliConfig.BUILD_VERSION} channel/${BiliConfig.CHANNEL} " +

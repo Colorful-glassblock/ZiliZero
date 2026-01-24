@@ -31,7 +31,8 @@ import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import master.flame.danmaku.danmaku.model.android.SimpleTextCacheStuffer
 import master.flame.danmaku.ui.widget.DanmakuSurfaceView
 
-@OptIn(UnstableApi::class)
+import androidx.activity.compose.BackHandler
+
 @Composable
 fun PlayerScreen(
     bvid: String,
@@ -39,6 +40,9 @@ fun PlayerScreen(
     onBackPressed: () -> Unit,
     viewModel: PlayerViewModel = viewModel()
 ) {
+    // Handle system back press
+    BackHandler(onBack = onBackPressed)
+
     val uiState by viewModel.uiState.collectAsState()
     val danmakuParser by viewModel.danmakuParser.collectAsState()
     val context = LocalContext.current
