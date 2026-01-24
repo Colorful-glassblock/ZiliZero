@@ -45,10 +45,6 @@ class PlayerViewModel(
         }
     }
 
-import kotlinx.coroutines.delay
-
-// ...
-
     fun loadVideo(bvid: String, cid: Long) {
         // Ensure player exists
         if (player == null) initializePlayer()
