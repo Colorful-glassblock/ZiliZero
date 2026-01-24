@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package bilibili.app.playurl.v1;
+
+option java_package = "com.bapis.bilibili.app.playurl.v1";
+option java_multiple_files = true;
+
+service PlayURL {
+    // 获取播放地址
+    rpc PlayView(PlayViewReq) returns (PlayViewReply);
+}
+
+message PlayViewReq {
+    int64 aid = 1;
+    int64 cid = 2;
+    int64 qn = 3;
+    int32 fnval = 4;
+    int32 download = 5;
+    int32 force_host = 6;
+    bool fourk = 7;
+    string spmid = 8;
+    string from_spmid = 9;
+    int32 prefer_codec_type = 10;
+}
+
+message PlayViewReply {
+    VideoInfo video_info = 1;
+}
+
+message VideoInfo {
+    int32 quality = 1;
+    string format = 2;
+    uint32 timelength = 3;
+    int32 video_codecid = 4;
+    ResponseDash dash = 5;
+    repeated Stream durl = 6;
+    repeated FormatDescription support_formats = 7;
+}
+
+message ResponseDash {
+    repeated DashItem video = 1;
+    repeated DashItem audio = 2;
+}
+
+message DashItem {
+    uint32 id = 1;
+    string base_url = 2;
+    repeated string backup_url = 3;
+    uint32 bandwidth = 4;
+    string codecid = 5;
+    uint32 size = 6;
+    uint32 frame_rate = 7;
+}
+
+message Stream {
+    uint32 order = 1;
+    uint32 length = 2;
+    uint32 size = 3;
+    string url = 4;
+    repeated string backup_url = 5;
+}
+
+message FormatDescription {
+    int32 quality = 1;
+    string format = 2;
+    string description = 3;
+    string display_desc = 4;
+    string superscription = 5;
+}
