@@ -24,9 +24,10 @@ sealed class PlayerUiState {
 
 @UnstableApi
 class PlayerViewModel(
-    application: Application,
-    private val repository: BiliRepository = BiliRepository()
+    application: Application
 ) : AndroidViewModel(application) {
+
+    private val repository: BiliRepository = BiliRepository()
 
     private val _uiState = MutableStateFlow<PlayerUiState>(PlayerUiState.Loading)
     val uiState: StateFlow<PlayerUiState> = _uiState.asStateFlow()
