@@ -45,6 +45,10 @@ class PlayerViewModel(
         }
     }
 
+import kotlinx.coroutines.delay
+
+// ...
+
     fun loadVideo(bvid: String, cid: Long) {
         // Ensure player exists
         if (player == null) initializePlayer()
@@ -55,6 +59,10 @@ class PlayerViewModel(
         
         viewModelScope.launch {
             _uiState.value = PlayerUiState.Loading
+            
+            // Give the decoder some time to release from previous session
+            delay(300) 
+            
             _danmakuParser.value = null // Reset danmaku
             try {
                 // Parallel fetch
