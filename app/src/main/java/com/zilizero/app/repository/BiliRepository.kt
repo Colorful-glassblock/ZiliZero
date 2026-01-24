@@ -29,24 +29,14 @@ class BiliRepository(
         cachedMixinKey?.let { return it }
         
         return withContext(Dispatchers.IO) {
-            val responseBody = api.getNavInfo()
-            val jsonString = responseBody.string()
+            val response = api.getNavInfo()
+            // We don't check code because sometimes it returns -101 (not logged in) but still has nav data.
+            // Or maybe it strictly requires login? Nav usually returns data even if not logged in.
             
-            try {
-                val type = object : TypeToken<BiliResponse<NavInfo>>() {}.type
-                val response: BiliResponse<NavInfo> = Gson().fromJson(jsonString, type)
-                
-                if (response.code != 0 && response.code != -101) { // -101 is not logged in, but nav data might still be partial? Actually nav usually returns 0 even if not logged in.
-                    // If code is not 0, we check if data is null.
-                }
-                
-                val wbiImg = response.data?.wbiImg ?: throw Exception("Failed to get Wbi keys. Code: ${response.code}")
-                val key = WbiUtil.getMixinKey(wbiImg.imgUrl, wbiImg.subUrl)
-                cachedMixinKey = key
-                key
-            } catch (e: Exception) {
-                throw Exception("Nav Parse Error: ${e.message}. Raw: ${jsonString.take(500)}")
-            }
+            val wbiImg = response.data?.wbiImg ?: throw Exception("Failed to get Wbi keys. Code: ${response.code}")
+            val key = WbiUtil.getMixinKey(wbiImg.imgUrl, wbiImg.subUrl)
+            cachedMixinKey = key
+            key
         }
     }
 
@@ -80,20 +70,12 @@ class BiliRepository(
                 "w_rid" to signedParams["w_rid"]!!
             )
             
-            val responseBody = api.getRecommendFeed(pageSize = 10, freshType = 3, signedParams = wbiAuthParams)
-            val jsonString = responseBody.string()
-
-            try {
-                val type = object : TypeToken<BiliResponse<FeedResponse>>() {}.type
-                val response: BiliResponse<FeedResponse> = Gson().fromJson(jsonString, type)
-                
-                if (response.code != 0) {
-                    throw Exception("Api Error: ${response.message} (code ${response.code})")
-                }
-                response.data?.item ?: emptyList()
-            } catch (e: Exception) {
-                throw Exception("Parse Error: ${e.message}. Raw: ${jsonString.take(500)}")
+            val response = api.getRecommendFeed(pageSize = 10, freshType = 3, signedParams = wbiAuthParams)
+            
+            if (response.code != 0) {
+                throw Exception("Api Error: ${response.message} (code ${response.code})")
             }
+            response.data?.item ?: emptyList()
         }
     }
 

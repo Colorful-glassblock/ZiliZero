@@ -9,7 +9,7 @@ interface BilibiliApi {
 
     // Get User Info and Wbi Keys
     @GET("x/web-interface/nav")
-    suspend fun getNavInfo(): ResponseBody // TEMPORARY: Debug raw response
+    suspend fun getNavInfo(): BiliResponse<NavInfo>
 
     // Real Recommendation Feed (Wbi signed)
     @GET("x/web-interface/wbi/index/top/feed/rcmd")
@@ -17,7 +17,7 @@ interface BilibiliApi {
         @Query("ps") pageSize: Int = 10,
         @Query("fresh_type") freshType: Int = 3,
         @QueryMap signedParams: Map<String, String> = emptyMap()
-    ): ResponseBody // TEMPORARY: Debug raw response
+    ): BiliResponse<FeedResponse>
 
     // Get Play URL (DASH)
     @GET("x/player/wbi/playurl")
