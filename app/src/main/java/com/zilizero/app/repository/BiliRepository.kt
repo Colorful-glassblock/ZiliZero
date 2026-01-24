@@ -46,8 +46,7 @@ class BiliRepository(
                 if (response.code != 0) {
                     throw Exception("Api Error: ${response.message} (code ${response.code})")
                 }
-                // Try 'item' (Feed) first, then 'list' (Ranking)
-                response.data?.item ?: response.data?.list ?: emptyList()
+                response.data?.item ?: emptyList()
             } catch (e: Exception) {
                 throw Exception("Parse Error: ${e.message}. Raw: ${jsonString.take(500)}")
             }

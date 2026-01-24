@@ -25,8 +25,7 @@ data class WbiImgInfo(
 
 // Feed / Recommendation models
 data class FeedResponse(
-    val item: List<FeedItem>?, // For Feed API
-    val list: List<FeedItem>?  // For Ranking API
+    val item: List<FeedItem>
 )
 
 data class FeedItem(
