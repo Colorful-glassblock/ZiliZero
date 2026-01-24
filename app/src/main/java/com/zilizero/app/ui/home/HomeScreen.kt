@@ -83,7 +83,7 @@ fun VideoCard(video: VideoCardModel, onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier.width(240.dp).aspectRatio(16f/9f),
         scale = CardDefaults.scale(focusedScale = 1.1f),
-        border = CardDefaults.border(focusedBorder = Border(border = androidx.tv.material3.BorderStroke(2.dp, MaterialTheme.colorScheme.primary)))
+        border = CardDefaults.border(focusedBorder = Border(border = androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.primary)))
     ) {
         Column {
             AsyncImage(

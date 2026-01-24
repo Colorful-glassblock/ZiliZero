@@ -41,7 +41,6 @@ class DanmakuParser : BaseDanmakuParser() {
 }
 
 class DmDataSource(private val reply: DmSegMobileReply) : IDataSource<DmSegMobileReply> {
-    override fun next(): DmSegMobileReply = reply
     override fun data(): DmSegMobileReply = reply
     override fun release() {}
 }

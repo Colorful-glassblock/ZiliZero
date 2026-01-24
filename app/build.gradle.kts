@@ -85,61 +85,52 @@ protobuf {
     }
 }
 
-dependencies {
-
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    
-    // TV Specific
-    implementation(libs.androidx.tv.foundation)
-    implementation(libs.androidx.tv.material)
-
-    // Media3
-    implementation(libs.androidx.media3.exoplayer)
-    implementation(libs.androidx.media3.datasource)
-    implementation(libs.androidx.media3.ui)
-
-    // Network & Data
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.gson)
-    implementation(libs.retrofit.converter.protobuf)
-
-    // Image Loading
-    implementation(libs.glide)
-    implementation(libs.coil.compose)
-
-    // Danmaku
-    implementation(libs.danmaku.flame.master) {
-        exclude(group = "com.google.protobuf", module = "protobuf-java")
-    }
-
-    // Protobuf & gRPC
-    implementation(libs.protobuf.kotlin.lite)
-    implementation(libs.grpc.okhttp)
-    implementation(libs.grpc.protobuf.lite)
-    implementation(libs.grpc.stub)
-    implementation(libs.grpc.kotlin.stub)
-
-    constraints {
-        implementation("com.google.protobuf:protobuf-javalite:3.25.1") {
-            because("Force using javalite version to resolve conflicts")
-        }
-        implementation("com.google.protobuf:protobuf-kotlin-lite:3.25.1") {
-            because("Force using javalite version to resolve conflicts")
+    configurations {
+        all {
+            exclude(group = "com.google.protobuf", module = "protobuf-java")
         }
     }
+
+    dependencies {
+        implementation(libs.core.ktx)
+        implementation(libs.lifecycle.runtime.ktx)
+        implementation(libs.activity.compose)
+        implementation(platform(libs.compose.bom))
+        implementation(libs.ui)
+        implementation(libs.ui.graphics)
+        implementation(libs.ui.tooling.preview)
+        implementation(libs.tv.material)
+        implementation(libs.lifecycle.viewmodel.compose) // Ensure this is present
+        
+        // Image Loading
+        implementation(libs.glide)
+        implementation(libs.coil.compose)
     
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-}
+        // Danmaku
+        implementation(libs.danmaku.flame.master)
+    
+        // Protobuf & gRPC
+        implementation(libs.protobuf.kotlin.lite)
+        implementation(libs.grpc.okhttp)
+        implementation(libs.grpc.protobuf.lite)
+        implementation(libs.grpc.stub)
+        implementation(libs.grpc.kotlin.stub)
+    
+        constraints {
+            implementation("com.google.protobuf:protobuf-javalite:3.25.1") {
+                because("Force using javalite version to resolve conflicts")
+            }
+            implementation("com.google.protobuf:protobuf-kotlin-lite:3.25.1") {
+                because("Force using javalite version to resolve conflicts")
+            }
+        }
+        
+        testImplementation(libs.junit)
+        androidTestImplementation(libs.androidx.junit)
+        androidTestImplementation(libs.androidx.espresso.core)
+        androidTestImplementation(platform(libs.compose.bom))
+        androidTestImplementation(libs.ui.test.junit4)
+        debugImplementation(libs.ui.tooling)
+        debugImplementation(libs.ui.test.manifest)
+    }
+

@@ -46,12 +46,12 @@ fun PlayerScreen(
     // Create DanmakuContext with TV optimizations
     val danmakuContext = remember {
         DanmakuContext.create().apply {
-            setDanmakuStyle(IDanmakus.DANMAKU_STYLE_STROKEN, 2.0f) // Thinner stroke for performance
+            // setDanmakuStyle(IDanmakus.DANMAKU_STYLE_STROKEN, 2.0f) // Removed due to compilation error
             setDuplicateMergingEnabled(false)
             setScrollSpeedFactor(1.2f)
             setScaleTextSize(1.5f) // Larger text for TV
             setCacheStuffer(SimpleTextCacheStuffer(), null) // Simple cache for performance
-            setMaximumVisibleSize(0) // Auto or set fixed limit
+            // setMaximumVisibleSize(0) // Removed due to compilation error
         }
     }
 
