@@ -16,6 +16,7 @@ class DanmakuParser : BaseDanmakuParser() {
         
         if (dataSource is DmDataSource) {
             val reply = dataSource.data()
+            android.util.Log.d("ZiliZero_Danmaku", "Parsing ${reply.elemsList.size} danmaku items")
             reply.elemsList.forEach { elem ->
                 val type = when (elem.mode) {
                     1, 2, 3 -> BaseDanmaku.TYPE_SCROLL_RL

@@ -97,21 +97,13 @@ class BiliRepository(
                 "w_rid" to signedParams["w_rid"]!!
             )
             
-            val responseBody = api.getPlayUrl(bvid, cid, signedParams = wbiAuthParams)
-            val jsonString = responseBody.string()
+            val response = api.getPlayUrl(bvid, cid, signedParams = wbiAuthParams)
             
-            try {
-                val type = object : TypeToken<BiliResponse<PlayUrlResponse>>() {}.type
-                val response: BiliResponse<PlayUrlResponse> = Gson().fromJson(jsonString, type)
-                
-                if (response.code != 0) {
-                    throw Exception("Bili Error: ${response.message} (code ${response.code})")
-                }
-                
-                response.data?.dash ?: throw Exception("No DASH info found")
-            } catch (e: Exception) {
-                throw Exception("PlayUrl Parse Error: ${e.message}. Raw: ${jsonString.take(500)}")
+            if (response.code != 0) {
+                throw Exception("Bili Error: ${response.message} (code ${response.code})")
             }
+            
+            response.data?.dash ?: throw Exception("No DASH info found")
         }
     }
 
