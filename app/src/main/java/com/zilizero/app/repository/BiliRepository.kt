@@ -30,21 +30,19 @@ class BiliRepository(
 
     suspend fun getRecommendFeed(): List<FeedItem> {
         return withContext(Dispatchers.IO) {
-            val mixinKey = ensureMixinKey()
-            
-            val params = mapOf(
-                "ps" to "20",
-                "fresh_type" to "3"
-            )
-            
-            val signedParams = WbiUtil.signParams(params, mixinKey)
-            val response = api.getRecommendFeed(signedParams)
-            
-            if (response.code != 0) {
-                throw Exception("Bili Error: ${response.message}")
+            val responseBody = api.getRecommendFeed()
+            val jsonString = responseBody.string()
+            println("BiliApi Response: $jsonString") // DEBUG LOG
+
+            try {
+                val response = com.google.gson.Gson().fromJson(jsonString, com.zilizero.app.network.FeedResponse::class.java)
+                if (response.code != 0) {
+                    throw Exception("Api Error: ${response.message} (code ${response.code})")
+                }
+                response.data.item
+            } catch (e: Exception) {
+                throw Exception("Parse Error: ${e.message}. Raw: $jsonString")
             }
-            
-            response.data?.item ?: emptyList()
         }
     }
 

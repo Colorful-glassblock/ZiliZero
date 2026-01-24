@@ -1,5 +1,6 @@
 package com.zilizero.app.network
 
+import okhttp3.ResponseBody
 import retrofit2.http.GET
 import retrofit2.http.Query
 import retrofit2.http.QueryMap
@@ -14,7 +15,7 @@ interface BilibiliApi {
     @GET("x/web-interface/wbi/index/top/feed/rcmd")
     suspend fun getRecommendFeed(
         @QueryMap signedParams: Map<String, String>
-    ): BiliResponse<FeedResponse>
+    ): ResponseBody // TEMPORARY: Debug raw response
 
     // Get Play URL (DASH)
     @GET("x/player/wbi/playurl")
