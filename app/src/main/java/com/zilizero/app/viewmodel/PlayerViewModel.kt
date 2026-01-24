@@ -63,13 +63,13 @@ class PlayerViewModel(
                 
                 val dash = dashDeferred.await()
                 val danmakuReply = danmakuDeferred.await()
-                android.util.Log.d("ZiliZero_VM", "Danmaku fetched. Size: ${danmakuReply.serializedSize}")
+                android.util.Log.e("ZiliZero_VM", "Danmaku fetched. Bytes: ${danmakuReply.serializedSize}")
                 
                 // Init Danmaku Parser
                 val parser = com.zilizero.app.ui.player.DanmakuParser()
                 parser.load(com.zilizero.app.ui.player.DmDataSource(danmakuReply))
                 _danmakuParser.value = parser
-                android.util.Log.d("ZiliZero_VM", "Danmaku parser updated")
+                android.util.Log.e("ZiliZero_VM", "Danmaku parser updated")
                 
                 // Select best video and audio streams
                 val videoUrl = dash.video.firstOrNull()?.baseUrl ?: throw Exception("No video stream")
