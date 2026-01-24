@@ -87,7 +87,7 @@ fun PlayerScreen(
                     factory = {
                         PlayerView(context).apply {
                             // Video should be below Danmaku
-                            // PlayerView by default uses SurfaceView
+                            setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
                             player = viewModel.player
                             useController = true
                         }
@@ -116,6 +116,23 @@ fun PlayerScreen(
                                 prepare(danmakuParser, danmakuContext)
                             }
                         },
+                        update = { view ->
+                            val player = viewModel.player
+                            if (player != null) {
+                                if (player.isPlaying) {
+                                    if (view.isPaused) view.resume()
+                                    val diff = view.currentTime - player.currentPosition
+                                    if (kotlin.math.abs(diff) > 1000) {
+                                        view.seekTo(player.currentPosition)
+                                    }
+                                } else {
+                                    if (!view.isPaused) view.pause()
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
         }
     }
