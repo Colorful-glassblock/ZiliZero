@@ -120,6 +120,7 @@ protobuf {
         // Network
         implementation(libs.retrofit)
         implementation(libs.retrofit.converter.gson)
+        implementation(libs.okhttp.logging.interceptor)
         // Note: retrofit-converter-protobuf is not used yet or conflicts, skipping for now unless needed.
 
         // Image Loading
