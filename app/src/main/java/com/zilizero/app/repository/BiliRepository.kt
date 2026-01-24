@@ -80,6 +80,10 @@ class BiliRepository(
         }
     }
 
+import com.zilizero.app.network.PlayUrlResponse
+
+// ... (inside BiliRepository)
+
     suspend fun getPlayUrl(bvid: String, cid: Long): DashInfo {
         return withContext(Dispatchers.IO) {
             val mixinKey = ensureMixinKey()
@@ -95,19 +99,26 @@ class BiliRepository(
             
             val signedParams = WbiUtil.signParams(params, mixinKey)
             
-            // Similarly, extract only auth params for the QueryMap, as other params are passed as args
             val wbiAuthParams = mapOf(
                 "wts" to signedParams["wts"]!!,
                 "w_rid" to signedParams["w_rid"]!!
             )
             
-            val response = api.getPlayUrl(bvid, cid, signedParams = wbiAuthParams)
+            val responseBody = api.getPlayUrl(bvid, cid, signedParams = wbiAuthParams)
+            val jsonString = responseBody.string()
             
-            if (response.code != 0) {
-                throw Exception("Bili Error: ${response.message}")
+            try {
+                val type = object : TypeToken<BiliResponse<PlayUrlResponse>>() {}.type
+                val response: BiliResponse<PlayUrlResponse> = Gson().fromJson(jsonString, type)
+                
+                if (response.code != 0) {
+                    throw Exception("Bili Error: ${response.message} (code ${response.code})")
+                }
+                
+                response.data?.dash ?: throw Exception("No DASH info found")
+            } catch (e: Exception) {
+                throw Exception("PlayUrl Parse Error: ${e.message}. Raw: ${jsonString.take(500)}")
             }
-            
-            response.data?.dash ?: throw Exception("No DASH info found")
         }
     }
 

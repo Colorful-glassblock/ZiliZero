@@ -29,7 +29,7 @@ interface BilibiliApi {
         @Query("fnver") fnver: Int = 0,
         @Query("fourk") fourk: Int = 1,
         @QueryMap signedParams: Map<String, String>
-    ): BiliResponse<PlayUrlResponse>
+    ): ResponseBody // TEMPORARY: Debug raw response
 
     // Get Danmaku Segment (Protobuf)
     @GET("x/v2/dm/web/seg.so")
