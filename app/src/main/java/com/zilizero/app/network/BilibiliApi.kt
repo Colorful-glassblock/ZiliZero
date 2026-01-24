@@ -14,7 +14,9 @@ interface BilibiliApi {
     // Real Recommendation Feed (Wbi signed)
     @GET("x/web-interface/wbi/index/top/feed/rcmd")
     suspend fun getRecommendFeed(
-        @QueryMap signedParams: Map<String, String>
+        @Query("ps") pageSize: Int = 10,
+        @Query("fresh_type") freshType: Int = 3,
+        @QueryMap signedParams: Map<String, String> = emptyMap()
     ): ResponseBody // TEMPORARY: Debug raw response
 
     // Get Play URL (DASH)

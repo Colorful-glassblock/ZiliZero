@@ -8,6 +8,11 @@ import com.zilizero.app.network.WbiUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.zilizero.app.network.BiliResponse
+import com.zilizero.app.network.FeedResponse
+
 class BiliRepository(
     private val api: BilibiliApi = NetworkClient.api
 ) {
@@ -30,18 +35,20 @@ class BiliRepository(
 
     suspend fun getRecommendFeed(): List<FeedItem> {
         return withContext(Dispatchers.IO) {
-            val responseBody = api.getRecommendFeed()
+            // Passing default params explicitly to avoid compiler issues with Retrofit defaults
+            val responseBody = api.getRecommendFeed(pageSize = 10, freshType = 3, signedParams = emptyMap())
             val jsonString = responseBody.string()
-            println("BiliApi Response: $jsonString") // DEBUG LOG
 
             try {
-                val response = com.google.gson.Gson().fromJson(jsonString, com.zilizero.app.network.FeedResponse::class.java)
+                val type = object : TypeToken<BiliResponse<FeedResponse>>() {}.type
+                val response: BiliResponse<FeedResponse> = Gson().fromJson(jsonString, type)
+                
                 if (response.code != 0) {
                     throw Exception("Api Error: ${response.message} (code ${response.code})")
                 }
-                response.data.item
+                response.data?.item ?: emptyList()
             } catch (e: Exception) {
-                throw Exception("Parse Error: ${e.message}. Raw: $jsonString")
+                throw Exception("Parse Error: ${e.message}. Raw: ${jsonString.take(500)}")
             }
         }
     }
