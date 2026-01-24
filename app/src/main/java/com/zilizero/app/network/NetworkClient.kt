@@ -24,7 +24,14 @@ object NetworkClient {
             .header("Referer", REFERER)
             .method(original.method, original.body)
         
-        chain.proceed(requestBuilder.build())
+        val response = chain.proceed(requestBuilder.build())
+        
+        // DEBUG: Peek response body
+        val responseBody = response.peekBody(Long.MAX_VALUE)
+        println("DEBUG_NETWORK: ${response.request.url} -> ${response.code}")
+        println("DEBUG_NETWORK_BODY: ${responseBody.string()}")
+        
+        response
     }
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
