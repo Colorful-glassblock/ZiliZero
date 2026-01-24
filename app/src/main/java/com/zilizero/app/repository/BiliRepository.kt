@@ -15,6 +15,8 @@ import com.zilizero.app.network.FeedResponse
 
 import com.zilizero.app.network.PlayUrlResponse
 
+import com.zilizero.app.network.NavInfo
+
 class BiliRepository(
     private val api: BilibiliApi = NetworkClient.api
 ) {
@@ -27,11 +29,24 @@ class BiliRepository(
         cachedMixinKey?.let { return it }
         
         return withContext(Dispatchers.IO) {
-            val response = api.getNavInfo()
-            val wbiImg = response.data?.wbiImg ?: throw Exception("Failed to get Wbi keys")
-            val key = WbiUtil.getMixinKey(wbiImg.imgUrl, wbiImg.subUrl)
-            cachedMixinKey = key
-            key
+            val responseBody = api.getNavInfo()
+            val jsonString = responseBody.string()
+            
+            try {
+                val type = object : TypeToken<BiliResponse<NavInfo>>() {}.type
+                val response: BiliResponse<NavInfo> = Gson().fromJson(jsonString, type)
+                
+                if (response.code != 0 && response.code != -101) { // -101 is not logged in, but nav data might still be partial? Actually nav usually returns 0 even if not logged in.
+                    // If code is not 0, we check if data is null.
+                }
+                
+                val wbiImg = response.data?.wbiImg ?: throw Exception("Failed to get Wbi keys. Code: ${response.code}")
+                val key = WbiUtil.getMixinKey(wbiImg.imgUrl, wbiImg.subUrl)
+                cachedMixinKey = key
+                key
+            } catch (e: Exception) {
+                throw Exception("Nav Parse Error: ${e.message}. Raw: ${jsonString.take(500)}")
+            }
         }
     }
 

@@ -9,7 +9,7 @@ interface BilibiliApi {
 
     // Get User Info and Wbi Keys
     @GET("x/web-interface/nav")
-    suspend fun getNavInfo(): BiliResponse<NavInfo>
+    suspend fun getNavInfo(): ResponseBody // TEMPORARY: Debug raw response
 
     // Real Recommendation Feed (Wbi signed)
     @GET("x/web-interface/wbi/index/top/feed/rcmd")
