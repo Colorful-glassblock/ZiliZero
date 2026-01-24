@@ -115,7 +115,9 @@ dependencies {
     implementation(libs.coil.compose)
 
     // Danmaku
-    implementation(libs.danmaku.flame.master)
+    implementation(libs.danmaku.flame.master) {
+        exclude(group = "com.google.protobuf", module = "protobuf-java")
+    }
 
     // Protobuf & gRPC
     implementation(libs.protobuf.kotlin.lite)
@@ -124,6 +126,15 @@ dependencies {
     implementation(libs.grpc.stub)
     implementation(libs.grpc.kotlin.stub)
 
+    constraints {
+        implementation("com.google.protobuf:protobuf-javalite:3.25.1") {
+            because("Force using javalite version to resolve conflicts")
+        }
+        implementation("com.google.protobuf:protobuf-kotlin-lite:3.25.1") {
+            because("Force using javalite version to resolve conflicts")
+        }
+    }
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
