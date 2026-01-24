@@ -88,6 +88,12 @@ protobuf {
     configurations {
         all {
             exclude(group = "com.google.protobuf", module = "protobuf-java")
+            
+            resolutionStrategy.eachDependency {
+                if (requested.group == "com.google.protobuf" && requested.name == "protobuf-java") {
+                    useTarget("com.google.protobuf:protobuf-javalite:3.25.1")
+                }
+            }
         }
     }
 
