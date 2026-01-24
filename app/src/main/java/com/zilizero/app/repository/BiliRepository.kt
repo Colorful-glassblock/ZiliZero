@@ -138,7 +138,9 @@ class BiliRepository(
     suspend fun getDanmaku(cid: Long): com.bapis.bilibili.community.service.dm.v1.DmSegMobileReply {
         return withContext(Dispatchers.IO) {
             // Fetch segment 1 (first 6 minutes) for demo
-            api.getDanmakuSeg(cid = cid, index = 1)
+            val responseBody = api.getDanmakuSeg(cid = cid, index = 1)
+            val bytes = responseBody.bytes()
+            com.bapis.bilibili.community.service.dm.v1.DmSegMobileReply.parseFrom(bytes)
         }
     }
 }

@@ -37,7 +37,7 @@ interface BilibiliApi {
         @Query("type") type: Int = 1,
         @Query("oid") cid: Long, // oid is cid
         @Query("segment_index") index: Int = 1
-    ): com.bapis.bilibili.community.service.dm.v1.DmSegMobileReply
+    ): ResponseBody // TEMPORARY: Debug raw response
 
     // Example search
     @GET("x/web-interface/wbi/search/all/v2")
