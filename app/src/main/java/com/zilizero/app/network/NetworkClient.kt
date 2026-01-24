@@ -28,8 +28,9 @@ object NetworkClient {
         
         // DEBUG: Peek response body
         val responseBody = response.peekBody(Long.MAX_VALUE)
-        println("DEBUG_NETWORK: ${response.request.url} -> ${response.code}")
-        println("DEBUG_NETWORK_BODY: ${responseBody.string()}")
+        android.util.Log.d("ZiliZero_Net", "URL: ${response.request.url}")
+        android.util.Log.d("ZiliZero_Net", "Code: ${response.code}")
+        android.util.Log.d("ZiliZero_Net", "Body: ${responseBody.string()}")
         
         response
     }
