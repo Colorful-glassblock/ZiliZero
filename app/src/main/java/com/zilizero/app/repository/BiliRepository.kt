@@ -29,14 +29,20 @@ class BiliRepository(
         cachedMixinKey?.let { return it }
         
         return withContext(Dispatchers.IO) {
-            val response = api.getNavInfo()
-            // We don't check code because sometimes it returns -101 (not logged in) but still has nav data.
-            // Or maybe it strictly requires login? Nav usually returns data even if not logged in.
+            val responseBody = api.getNavInfo()
+            val jsonString = responseBody.string()
             
-            val wbiImg = response.data?.wbiImg ?: throw Exception("Failed to get Wbi keys. Code: ${response.code}")
-            val key = WbiUtil.getMixinKey(wbiImg.imgUrl, wbiImg.subUrl)
-            cachedMixinKey = key
-            key
+            try {
+                val type = object : TypeToken<BiliResponse<NavInfo>>() {}.type
+                val response: BiliResponse<NavInfo> = Gson().fromJson(jsonString, type)
+                
+                val wbiImg = response.data?.wbiImg ?: throw Exception("Failed to get Wbi keys. Code: ${response.code}")
+                val key = WbiUtil.getMixinKey(wbiImg.imgUrl, wbiImg.subUrl)
+                cachedMixinKey = key
+                key
+            } catch (e: Exception) {
+                throw Exception("Nav Parse Error: ${e.message}. Raw: ${jsonString.take(500)}")
+            }
         }
     }
 
@@ -49,33 +55,25 @@ class BiliRepository(
             )
             val signedParams = WbiUtil.signParams(params, mixinKey)
             
-            // Passing default params explicitly to avoid compiler issues with Retrofit defaults
-            // Note: signedParams already contains 'wts' and 'w_rid', and we don't need to pass ps/fresh_type again in Query args if we put them in QueryMap, 
-            // BUT BilibiliApi definition has fixed params.
-            // Actually, we should pass the signedParams map which CONTAINS w_rid and wts.
-            // The fixed params (ps, fresh_type) will be added by Retrofit as Query params.
-            // We need to make sure we don't duplicate them or miss them in signature.
-            // WbiUtil.signParams returns a map with ALL params (including ps, fresh_type, wts, w_rid).
-            // So we should just pass the EXTRA params (wts, w_rid) to the QueryMap, OR change API to use QueryMap for everything.
-            
-            // Current API: getRecommendFeed(ps, fresh_type, signedParams)
-            // If we pass 'ps' and 'fresh_type' as arguments, Retrofit adds them.
-            // signedParams map SHOULD ONLY contain 'wts' and 'w_rid' then? 
-            // NO. Wbi signature requires ALL params to be sorted and hashed.
-            // But when sending request, if we send 'ps' twice (once from arg, once from map), it might be an issue.
-            
-            // Strategy: Extract only wts and w_rid from the signed map to pass to the QueryMap.
             val wbiAuthParams = mapOf(
                 "wts" to signedParams["wts"]!!,
                 "w_rid" to signedParams["w_rid"]!!
             )
             
-            val response = api.getRecommendFeed(pageSize = 10, freshType = 3, signedParams = wbiAuthParams)
-            
-            if (response.code != 0) {
-                throw Exception("Api Error: ${response.message} (code ${response.code})")
+            val responseBody = api.getRecommendFeed(pageSize = 10, freshType = 3, signedParams = wbiAuthParams)
+            val jsonString = responseBody.string()
+
+            try {
+                val type = object : TypeToken<BiliResponse<FeedResponse>>() {}.type
+                val response: BiliResponse<FeedResponse> = Gson().fromJson(jsonString, type)
+                
+                if (response.code != 0) {
+                    throw Exception("Api Error: ${response.message} (code ${response.code})")
+                }
+                response.data?.item ?: emptyList()
+            } catch (e: Exception) {
+                throw Exception("Parse Error: ${e.message}. Raw: ${jsonString.take(500)}")
             }
-            response.data?.item ?: emptyList()
         }
     }
 

@@ -86,11 +86,14 @@ fun PlayerScreen(
                 AndroidView(
                     factory = {
                         PlayerView(context).apply {
+                            // Video should be below Danmaku
+                            // PlayerView by default uses SurfaceView
                             player = viewModel.player
                             useController = true
                         }
                     },
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    onRelease = { it.player = null }
                 )
                 
                 // Danmaku Layer
@@ -98,6 +101,8 @@ fun PlayerScreen(
                     AndroidView(
                         factory = {
                             DanmakuSurfaceView(context).apply {
+                                // Important: Force danmaku to be on top of everything
+                                setZOrderMediaOverlay(true)
                                 setZOrderOnTop(true)
                                 holder.setFormat(android.graphics.PixelFormat.TRANSLUCENT)
                                 setCallback(object : DrawHandler.Callback {
@@ -111,25 +116,6 @@ fun PlayerScreen(
                                 prepare(danmakuParser, danmakuContext)
                             }
                         },
-                        update = { view ->
-                            // Sync logic: Pass player position to DanmakuView
-                            val player = viewModel.player
-                            if (player != null) {
-                                if (player.isPlaying) {
-                                    if (view.isPaused) view.resume()
-                                    // Simple sync mechanism: seek if drift is large
-                                    val diff = view.currentTime - player.currentPosition
-                                    if (kotlin.math.abs(diff) > 1000) {
-                                        view.seekTo(player.currentPosition)
-                                    }
-                                } else {
-                                    if (!view.isPaused) view.pause()
-                                }
-                            }
-                        },
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
             }
         }
     }
