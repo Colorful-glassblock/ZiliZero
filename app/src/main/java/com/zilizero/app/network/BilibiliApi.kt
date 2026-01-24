@@ -11,8 +11,8 @@ interface BilibiliApi {
     @GET("x/web-interface/nav")
     suspend fun getNavInfo(): BiliResponse<NavInfo>
 
-    // Real Recommendation Feed (Wbi signed)
-    @GET("x/web-interface/wbi/index/top/feed/rcmd")
+    // TEMPORARY: Use Ranking API (No Wbi required)
+    @GET("x/web-interface/ranking/v2?rid=0&type=all") 
     suspend fun getRecommendFeed(
         @Query("ps") pageSize: Int = 10,
         @Query("fresh_type") freshType: Int = 3,
