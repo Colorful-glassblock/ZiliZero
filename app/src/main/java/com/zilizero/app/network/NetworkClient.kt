@@ -24,19 +24,11 @@ object NetworkClient {
             .header("Referer", REFERER)
             .method(original.method, original.body)
         
-        val response = chain.proceed(requestBuilder.build())
-        
-        // DEBUG: Peek response body
-        val responseBody = response.peekBody(Long.MAX_VALUE)
-        android.util.Log.d("ZiliZero_Net", "URL: ${response.request.url}")
-        android.util.Log.d("ZiliZero_Net", "Code: ${response.code}")
-        android.util.Log.d("ZiliZero_Net", "Body: ${responseBody.string()}")
-        
-        response
+        chain.proceed(requestBuilder.build())
     }
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
+        level = HttpLoggingInterceptor.Level.HEADERS
     }
 
     private val okHttpClient = OkHttpClient.Builder()
