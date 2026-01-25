@@ -54,7 +54,7 @@ fun PlayerScreen(
             setDuplicateMergingEnabled(true) // ENABLED for performance (TV 4K fillrate)
             setScrollSpeedFactor(1.2f)
             setScaleTextSize(1.5f) // Larger text for TV
-            setCacheStuffer(SimpleTextCacheStuffer(), null) // Simple cache for performance
+            // setCacheStuffer(SimpleTextCacheStuffer(), null) // REMOVED: Revert to default renderer for debugging
         }
     }
 
@@ -64,8 +64,8 @@ fun PlayerScreen(
             setZOrderOnTop(true) // FORCE ON TOP: Places this Surface strictly ABOVE the window
             holder.setFormat(android.graphics.PixelFormat.TRANSLUCENT) // Ensure transparency
             
-            // DEBUG: Visual confirmation - SEMI-TRANSPARENT RED
-            this.setBackgroundColor(android.graphics.Color.parseColor("#88FF0000")) 
+            // DEBUG: Visual confirmation - REMOVED RED BACKGROUND
+            // this.setBackgroundColor(android.graphics.Color.parseColor("#88FF0000")) 
 
             setCallback(object : DrawHandler.Callback {
                 override fun prepared() {
