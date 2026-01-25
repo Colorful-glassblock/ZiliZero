@@ -22,13 +22,26 @@ class DanmakuParser : BaseDanmakuParser() {
             val testItem = mContext.mDanmakuFactory.createDanmaku(BaseDanmaku.TYPE_SCROLL_RL)
             if (testItem != null) {
                 testItem.flags = mContext.mGlobalFlagValues
-                testItem.text = "=== 立即显示测试 (IMMEDIATE) ==="
+                testItem.text = "=== 立即显示测试 (SCROLL) ==="
                 testItem.time = 100 // Show almost immediately
                 testItem.textSize = 50f // Very big
                 testItem.textColor = Color.CYAN or -0x1000000 // Cyan, full alpha
                 testItem.textShadowColor = Color.BLACK
                 testItem.priority = 1 // High priority
                 danmakus.addItem(testItem)
+            }
+
+            // TEST 2: Fixed Top Danmaku
+            val testItem2 = mContext.mDanmakuFactory.createDanmaku(BaseDanmaku.TYPE_FIX_TOP)
+            if (testItem2 != null) {
+                testItem2.flags = mContext.mGlobalFlagValues
+                testItem2.text = "=== 顶部固定测试 (FIX TOP) ==="
+                testItem2.time = 200 
+                testItem2.textSize = 50f
+                testItem2.textColor = Color.GREEN or -0x1000000
+                testItem2.textShadowColor = Color.BLACK
+                testItem2.priority = 1
+                danmakus.addItem(testItem2)
             }
 
             reply.elemsList.forEachIndexed { index, elem ->

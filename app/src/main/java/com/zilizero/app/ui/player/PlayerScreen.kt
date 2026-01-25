@@ -69,11 +69,14 @@ fun PlayerScreen(
 
             setCallback(object : DrawHandler.Callback {
                 override fun prepared() {
-                    android.util.Log.e("ZiliZero_Danmaku", "SurfaceView Prepared & Showing")
+                    android.util.Log.e("ZiliZero_Danmaku", "SurfaceView Prepared. Starting...")
                     start()
+                    seekTo(0) // Force align to start
                 }
                 override fun updateTimer(timer: DanmakuTimer?) {}
-                override fun danmakuShown(danmaku: BaseDanmaku?) {}
+                override fun danmakuShown(danmaku: BaseDanmaku?) {
+                    android.util.Log.e("ZiliZero_Danmaku", "SHOWN: ${danmaku?.text}")
+                }
                 override fun drawingFinished() {}
             })
         }
