@@ -29,7 +29,7 @@ import master.flame.danmaku.danmaku.model.DanmakuTimer
 import master.flame.danmaku.danmaku.model.IDanmakus
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import master.flame.danmaku.danmaku.model.android.SimpleTextCacheStuffer
-import master.flame.danmaku.ui.widget.DanmakuSurfaceView
+import master.flame.danmaku.ui.widget.DanmakuView
 
 import androidx.activity.compose.BackHandler
 
@@ -96,15 +96,12 @@ fun PlayerScreen(
                     onRelease = { it.player = null }
                 )
                 
-                // Danmaku Layer
+                // Danmaku Layer - Switched to DanmakuView (Standard View) to ensure visibility over SurfaceView
                 if (danmakuParser != null) {
                     AndroidView(
                         factory = {
-                            DanmakuSurfaceView(context).apply {
-                                // Important: Force danmaku to be on top of everything
-                                setZOrderMediaOverlay(true)
-                                // setZOrderOnTop(true) // Sometimes causes issues, try disabling
-                                holder.setFormat(android.graphics.PixelFormat.TRANSLUCENT)
+                            DanmakuView(context).apply {
+                                // Standard View doesn't need Z-Order config, it naturally overlays SurfaceView
                                 
                                 // DEBUG: Check if view is visible
                                 // this.setBackgroundColor(android.graphics.Color.parseColor("#33FF0000")) 
@@ -112,7 +109,7 @@ fun PlayerScreen(
                                 setCallback(object : DrawHandler.Callback {
                                     override fun prepared() {
                                         start()
-                                        show() // Ensure it is shown
+                                        show()
                                     }
                                     override fun updateTimer(timer: DanmakuTimer?) {}
                                     override fun danmakuShown(danmaku: BaseDanmaku?) {}
