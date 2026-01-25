@@ -104,8 +104,13 @@ fun PlayerScreen(
                                     
                                     setCallback(object : DrawHandler.Callback {
                                         override fun prepared() {
-                                            android.util.Log.e("ZiliZero_Danmaku", "Prepared. Starting at: ${viewModel.player?.currentPosition ?: 0}")
-                                            start(viewModel.player?.currentPosition ?: 0)
+                                            // DFM calls this on a background thread.
+                                            // We must post to Main Thread to access ExoPlayer safely.
+                                            post {
+                                                val pos = viewModel.player?.currentPosition ?: 0
+                                                android.util.Log.e("ZiliZero_Danmaku", "Prepared. Starting at: $pos")
+                                                start(pos)
+                                            }
                                         }
                                         override fun updateTimer(timer: DanmakuTimer?) {
                                             // 极低频率打印计时器，确认它在走
