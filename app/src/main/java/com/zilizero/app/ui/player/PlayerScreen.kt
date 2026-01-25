@@ -29,7 +29,7 @@ import master.flame.danmaku.danmaku.model.DanmakuTimer
 import master.flame.danmaku.danmaku.model.IDanmakus
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import master.flame.danmaku.danmaku.model.android.SimpleTextCacheStuffer
-import master.flame.danmaku.ui.widget.DanmakuSurfaceView
+import master.flame.danmaku.ui.widget.DanmakuTextureView
 
 import androidx.activity.compose.BackHandler
 
@@ -98,13 +98,12 @@ fun PlayerScreen(
                     androidx.compose.runtime.key(danmakuParser) {
                         AndroidView(
                             factory = {
-                                DanmakuSurfaceView(context).apply {
+                                DanmakuTextureView(context).apply {
                                     layoutParams = android.view.ViewGroup.LayoutParams(
                                         android.view.ViewGroup.LayoutParams.MATCH_PARENT,
                                         android.view.ViewGroup.LayoutParams.MATCH_PARENT
                                     )
-                                    setZOrderOnTop(true)
-                                    holder.setFormat(android.graphics.PixelFormat.TRANSLUCENT)
+                                    isOpaque = false // Vital for TextureView transparency
                                     
                                     setCallback(object : DrawHandler.Callback {
                                         override fun prepared() {
@@ -112,7 +111,7 @@ fun PlayerScreen(
                                             // We must post to Main Thread to access ExoPlayer safely.
                                             post {
                                                 val pos = viewModel.player?.currentPosition ?: 0
-                                                android.util.Log.e("ZiliZero_Danmaku", "Prepared. Starting at: $pos. View Size: $width x $height")
+                                                android.util.Log.e("ZiliZero_Danmaku", "Prepared (TextureView). Starting at: $pos. View Size: $width x $height")
                                                 start(pos)
                                             }
                                         }
