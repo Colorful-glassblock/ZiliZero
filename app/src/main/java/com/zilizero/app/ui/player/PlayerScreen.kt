@@ -55,7 +55,10 @@ fun PlayerScreen(
             setDuplicateMergingEnabled(true)
             setScrollSpeedFactor(1.2f)
             setScaleTextSize(1.5f)
-            setCacheStuffer(SimpleTextCacheStuffer(), null)
+            
+            // CRITICAL: Reset filters to ensure nothing is hidden by default
+            unregisterAllConfigFilter()
+            resetContext()
         }
     }
 

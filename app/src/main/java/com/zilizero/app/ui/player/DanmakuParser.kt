@@ -29,6 +29,7 @@ class DanmakuParser : BaseDanmakuParser() {
                 testItem.textShadowColor = Color.BLACK
                 testItem.priority = 1 // High priority
                 danmakus.addItem(testItem)
+                android.util.Log.e("ZiliZero_Danmaku", "INJECTED: Test Scroll Item at 100ms")
             }
 
             // TEST 2: Fixed Top Danmaku
@@ -42,6 +43,7 @@ class DanmakuParser : BaseDanmakuParser() {
                 testItem2.textShadowColor = Color.BLACK
                 testItem2.priority = 1
                 danmakus.addItem(testItem2)
+                android.util.Log.e("ZiliZero_Danmaku", "INJECTED: Test FixTop Item at 200ms")
             }
 
             reply.elemsList.forEachIndexed { index, elem ->
