@@ -53,7 +53,7 @@ fun PlayerScreen(
         DanmakuContext.create().apply {
             setDuplicateMergingEnabled(true)
             setScrollSpeedFactor(1.2f)
-            setScaleTextSize(1.5f) // Larger text for TV
+            setScaleTextSize(3.0f) // FORCE DEBUG SIZE: 3.0f to ensure visibility
         }
     }
 
@@ -99,6 +99,10 @@ fun PlayerScreen(
                         AndroidView(
                             factory = {
                                 DanmakuSurfaceView(context).apply {
+                                    layoutParams = android.view.ViewGroup.LayoutParams(
+                                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                                        android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                                    )
                                     setZOrderOnTop(true)
                                     holder.setFormat(android.graphics.PixelFormat.TRANSLUCENT)
                                     
@@ -108,7 +112,7 @@ fun PlayerScreen(
                                             // We must post to Main Thread to access ExoPlayer safely.
                                             post {
                                                 val pos = viewModel.player?.currentPosition ?: 0
-                                                android.util.Log.e("ZiliZero_Danmaku", "Prepared. Starting at: $pos")
+                                                android.util.Log.e("ZiliZero_Danmaku", "Prepared. Starting at: $pos. View Size: $width x $height")
                                                 start(pos)
                                             }
                                         }
