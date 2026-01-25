@@ -33,6 +33,7 @@ import master.flame.danmaku.ui.widget.DanmakuSurfaceView
 
 import androidx.activity.compose.BackHandler
 
+@OptIn(UnstableApi::class)
 @Composable
 fun PlayerScreen(
     bvid: String,
@@ -46,79 +47,19 @@ fun PlayerScreen(
     val uiState by viewModel.uiState.collectAsState()
     val danmakuParser by viewModel.danmakuParser.collectAsState()
     val context = LocalContext.current
-    val density = androidx.compose.ui.platform.LocalDensity.current
     
     // Create DanmakuContext with TV optimizations
     val danmakuContext = remember {
         DanmakuContext.create().apply {
-            // setDanmakuStyle(IDanmakus.DANMAKU_STYLE_STROKEN, 2.0f) // Removed due to compilation error
-            setDuplicateMergingEnabled(true) // ENABLED for performance (TV 4K fillrate)
+            setDuplicateMergingEnabled(true)
             setScrollSpeedFactor(1.2f)
-            
-            // FORCE DENSITY: Hardcode to 3.0f (xxhdpi) to prevent "Zero Size" issue
-            // If LocalDensity is weird on TV, this ensures text is rendered at a visible size.
-            setScaleTextSize(3.0f) 
-            
-            // setCacheStuffer(SimpleTextCacheStuffer(), null) // REMOVED: Revert to default renderer for debugging
-        }
-    }
-
-    // Create DanmakuView instance to be managed by Compose and Listeners
-    val danmakuView = remember {
-        DanmakuSurfaceView(context).apply {
-            setZOrderOnTop(true) // FORCE ON TOP: Places this Surface strictly ABOVE the window
-            holder.setFormat(android.graphics.PixelFormat.TRANSLUCENT) // Ensure transparency
-            
-            // DEBUG: Visual confirmation - REMOVED RED BACKGROUND
-            // this.setBackgroundColor(android.graphics.Color.parseColor("#88FF0000")) 
-
-            setCallback(object : DrawHandler.Callback {
-                override fun prepared() {
-                    android.util.Log.e("ZiliZero_Danmaku", "SurfaceView Prepared. Starting...")
-                    start()
-                    seekTo(0) // Force align to start
-                }
-                override fun updateTimer(timer: DanmakuTimer?) {}
-                override fun danmakuShown(danmaku: BaseDanmaku?) {
-                    android.util.Log.e("ZiliZero_Danmaku", "SHOWN: ${danmaku?.text}")
-                }
-                override fun drawingFinished() {}
-            })
+            setScaleTextSize(1.5f) // Larger text for TV
         }
     }
 
     LaunchedEffect(bvid, cid) {
         viewModel.initializePlayer()
         viewModel.loadVideo(bvid, cid)
-    }
-
-    // Bind Player Events to DanmakuView (Robust Sync)
-    val player = viewModel.player
-    if (player != null) {
-        DisposableEffect(player) {
-            val listener = object : Player.Listener {
-                override fun onIsPlayingChanged(isPlaying: Boolean) {
-                    if (isPlaying) {
-                        danmakuView.resume()
-                    } else {
-                        danmakuView.pause()
-                    }
-                }
-
-                override fun onPositionDiscontinuity(
-                    oldPosition: Player.PositionInfo,
-                    newPosition: Player.PositionInfo,
-                    reason: Int
-                ) {
-                    // Sync on Seek
-                    if (danmakuView.isPrepared) {
-                        danmakuView.seekTo(newPosition.contentPositionMs)
-                    }
-                }
-            }
-            player.addListener(listener)
-            onDispose { player.removeListener(listener) }
-        }
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
@@ -157,13 +98,49 @@ fun PlayerScreen(
                     androidx.compose.runtime.key(danmakuParser) {
                         AndroidView(
                             factory = {
-                                danmakuView.apply {
+                                DanmakuSurfaceView(context).apply {
+                                    setZOrderOnTop(true)
+                                    holder.setFormat(android.graphics.PixelFormat.TRANSLUCENT)
+                                    
+                                    setCallback(object : DrawHandler.Callback {
+                                        override fun prepared() {
+                                            android.util.Log.e("ZiliZero_Danmaku", "Prepared. Starting at: ${viewModel.player?.currentPosition ?: 0}")
+                                            start(viewModel.player?.currentPosition ?: 0)
+                                        }
+                                        override fun updateTimer(timer: DanmakuTimer?) {
+                                            // 极低频率打印计时器，确认它在走
+                                            if (timer != null && timer.currMillisecond % 5000 < 50) {
+                                                android.util.Log.e("ZiliZero_Danmaku", "Timer at: ${timer.currMillisecond}")
+                                            }
+                                        }
+                                        override fun danmakuShown(danmaku: BaseDanmaku?) {
+                                            android.util.Log.e("ZiliZero_Danmaku", "SHOWN: ${danmaku?.text}")
+                                        }
+                                        override fun drawingFinished() {}
+                                    })
                                     prepare(danmakuParser, danmakuContext)
-                                    show()
+                                }
+                            },
+                            update = { view ->
+                                // 每当 Compose 重组时，强行同步一次时间
+                                val player = viewModel.player
+                                if (player != null && view.isPrepared) {
+                                    if (player.isPlaying) {
+                                        view.resume()
+                                        val diff = view.currentTime - player.currentPosition
+                                        if (kotlin.math.abs(diff) > 500) {
+                                            view.seekTo(player.currentPosition)
+                                        }
+                                    } else {
+                                        view.pause()
+                                    }
                                 }
                             },
                             modifier = Modifier.fillMaxSize(),
-                            onRelease = { it.release() }
+                            onRelease = { 
+                                android.util.Log.e("ZiliZero_Danmaku", "Releasing View")
+                                it.release() 
+                            }
                         )
                     }
                 }
