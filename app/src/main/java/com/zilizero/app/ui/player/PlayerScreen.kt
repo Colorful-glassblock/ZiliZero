@@ -61,9 +61,12 @@ fun PlayerScreen(
     // Create DanmakuView instance to be managed by Compose and Listeners
     val danmakuView = remember {
         DanmakuSurfaceView(context).apply {
-            setZOrderMediaOverlay(true) // CRITICAL: Places this Surface ABOVE the video Surface
+            setZOrderOnTop(true) // FORCE ON TOP: Places this Surface strictly ABOVE the window
             holder.setFormat(android.graphics.PixelFormat.TRANSLUCENT) // Ensure transparency
             
+            // DEBUG: Visual confirmation - SEMI-TRANSPARENT RED
+            this.setBackgroundColor(android.graphics.Color.parseColor("#88FF0000")) 
+
             setCallback(object : DrawHandler.Callback {
                 override fun prepared() {
                     android.util.Log.e("ZiliZero_Danmaku", "SurfaceView Prepared & Showing")
