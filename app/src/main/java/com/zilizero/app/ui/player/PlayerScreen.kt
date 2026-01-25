@@ -50,7 +50,7 @@ fun PlayerScreen(
     // Create DanmakuContext with TV optimizations
     val danmakuContext = remember {
         DanmakuContext.create().apply {
-            setDanmakuStyle(IDanmakus.DANMAKU_STYLE_STROKEN, 2.0f)
+            // setDanmakuStyle(IDanmakus.DANMAKU_STYLE_STROKEN, 2.0f) // Removed due to compilation error
             setDuplicateMergingEnabled(true) // ENABLED for performance (TV 4K fillrate)
             setScrollSpeedFactor(1.2f)
             setScaleTextSize(1.5f) // Larger text for TV

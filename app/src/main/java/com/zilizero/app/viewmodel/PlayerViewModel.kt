@@ -10,11 +10,13 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.MergingMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.zilizero.app.repository.BiliRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 sealed class PlayerUiState {
     object Loading : PlayerUiState()
@@ -61,32 +63,11 @@ class PlayerViewModel(
                 val dashDeferred = async { repository.getPlayUrl(bvid, cid) }
                 val danmakuDeferred = async { repository.getDanmaku(cid) }
                 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-
-// ... imports
-
-    fun loadVideo(bvid: String, cid: Long) {
-        // Ensure player exists
-        if (player == null) initializePlayer()
-        
-        val exoPlayer = player!!
-        exoPlayer.stop()
-        exoPlayer.clearMediaItems()
-        
-        viewModelScope.launch {
-            _uiState.value = PlayerUiState.Loading
-            _danmakuParser.value = null // Reset danmaku
-            try {
-                // Parallel fetch
-                val dashDeferred = async { repository.getPlayUrl(bvid, cid) }
-                val danmakuDeferred = async { repository.getDanmaku(cid) }
-                
                 val dash = dashDeferred.await()
                 val danmakuReply = danmakuDeferred.await()
                 android.util.Log.e("ZiliZero_VM", "Danmaku fetched. Bytes: ${danmakuReply.serializedSize}")
                 
-                // Init Danmaku Parser on Background Thread
+                // Init Danmaku Parser on Background Thread (Fixes Main Thread Block)
                 val parser = withContext(Dispatchers.Default) {
                     val p = com.zilizero.app.ui.player.DanmakuParser()
                     p.load(com.zilizero.app.ui.player.DmDataSource(danmakuReply))
