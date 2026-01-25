@@ -98,42 +98,45 @@ fun PlayerScreen(
                 
                 // Danmaku Layer - Switched to DanmakuView (Standard View) to ensure visibility over SurfaceView
                 if (danmakuParser != null) {
-                    AndroidView(
-                        factory = {
-                            DanmakuView(context).apply {
-                                // Standard View doesn't need Z-Order config, it naturally overlays SurfaceView
-                                
-                                // DEBUG: Check if view is visible
-                                // this.setBackgroundColor(android.graphics.Color.parseColor("#33FF0000")) 
+                    androidx.compose.runtime.key(danmakuParser) {
+                        AndroidView(
+                            factory = {
+                                DanmakuView(context).apply {
+                                    // Standard View doesn't need Z-Order config, it naturally overlays SurfaceView
+                                    
+                                    // DEBUG: Check if view is visible
+                                    // this.setBackgroundColor(android.graphics.Color.parseColor("#33FF0000")) 
 
-                                setCallback(object : DrawHandler.Callback {
-                                    override fun prepared() {
-                                        start()
-                                        show()
-                                    }
-                                    override fun updateTimer(timer: DanmakuTimer?) {}
-                                    override fun danmakuShown(danmaku: BaseDanmaku?) {}
-                                    override fun drawingFinished() {}
-                                })
-                                prepare(danmakuParser, danmakuContext)
-                            }
-                        },
-                        update = { view ->
-                            val player = viewModel.player
-                            if (player != null) {
-                                if (player.isPlaying) {
-                                    if (view.isPaused) view.resume()
-                                    val diff = view.currentTime - player.currentPosition
-                                    if (kotlin.math.abs(diff) > 1000) {
-                                        view.seekTo(player.currentPosition)
-                                    }
-                                } else {
-                                    if (!view.isPaused) view.pause()
+                                    setCallback(object : DrawHandler.Callback {
+                                        override fun prepared() {
+                                            start()
+                                            show()
+                                        }
+                                        override fun updateTimer(timer: DanmakuTimer?) {}
+                                        override fun danmakuShown(danmaku: BaseDanmaku?) {}
+                                        override fun drawingFinished() {}
+                                    })
+                                    prepare(danmakuParser, danmakuContext)
                                 }
-                            }
-                        },
-                        modifier = Modifier.fillMaxSize()
-                    )
+                            },
+                            update = { view ->
+                                val player = viewModel.player
+                                if (player != null) {
+                                    if (player.isPlaying) {
+                                        if (view.isPaused) view.resume()
+                                        val diff = view.currentTime - player.currentPosition
+                                        if (kotlin.math.abs(diff) > 1000) {
+                                            view.seekTo(player.currentPosition)
+                                        }
+                                    } else {
+                                        if (!view.isPaused) view.pause()
+                                    }
+                                }
+                            },
+                            modifier = Modifier.fillMaxSize(),
+                            onRelease = { it.release() }
+                        )
+                    }
                 }
             }
         }

@@ -21,6 +21,7 @@ class DanmakuParser : BaseDanmakuParser() {
             // TEST: Inject a fake danmaku to verify UI rendering
             val testItem = mContext.mDanmakuFactory.createDanmaku(BaseDanmaku.TYPE_SCROLL_RL)
             if (testItem != null) {
+                testItem.flags = mContext.mGlobalFlagValues // Fix NPE
                 testItem.text = "=== TEST DANMAKU DEBUG ==="
                 testItem.time = 5000 // Show at 5th second
                 testItem.textSize = 40f
@@ -39,6 +40,7 @@ class DanmakuParser : BaseDanmakuParser() {
                 
                 val item = mContext.mDanmakuFactory.createDanmaku(type)
                 if (item != null) {
+                    item.flags = mContext.mGlobalFlagValues // Fix NPE
                     item.text = elem.content
                     item.time = elem.progress.toLong()
                     item.textSize = 25f * (mContext.displayer.density - 0.6f)
