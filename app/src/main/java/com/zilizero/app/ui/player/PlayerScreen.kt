@@ -105,7 +105,7 @@ fun PlayerScreen(
                                     // Standard View doesn't need Z-Order config, it naturally overlays SurfaceView
                                     
                                     // DEBUG: Check if view is visible
-                                    // this.setBackgroundColor(android.graphics.Color.parseColor("#33FF0000")) 
+                                    this.setBackgroundColor(android.graphics.Color.parseColor("#33FF0000")) 
 
                                     setCallback(object : DrawHandler.Callback {
                                         override fun prepared() {

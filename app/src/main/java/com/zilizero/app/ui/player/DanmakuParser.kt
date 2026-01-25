@@ -18,7 +18,22 @@ class DanmakuParser : BaseDanmakuParser() {
             val reply = dataSource.data()
             android.util.Log.e("ZiliZero_Danmaku", "PARSING START! Items: ${reply.elemsList.size}")
             
-            reply.elemsList.forEach { elem ->
+            // TEST: Inject a fake danmaku to verify UI rendering
+            val testItem = mContext.mDanmakuFactory.createDanmaku(BaseDanmaku.TYPE_SCROLL_RL)
+            if (testItem != null) {
+                testItem.flags = mContext.mGlobalFlagValues // Fix NPE
+                testItem.text = "=== TEST DANMAKU DEBUG ==="
+                testItem.time = 5000 // Show at 5th second
+                testItem.textSize = 40f
+                testItem.textColor = Color.RED or -0x1000000
+                testItem.textShadowColor = Color.WHITE
+                danmakus.addItem(testItem)
+            }
+
+            reply.elemsList.forEachIndexed { index, elem ->
+                if (index == 0) {
+                     android.util.Log.e("ZiliZero_Danmaku", "First Item: content='${elem.content}', time=${elem.progress}, mode=${elem.mode}")
+                }
                 val type = when (elem.mode) {
                     1, 2, 3 -> BaseDanmaku.TYPE_SCROLL_RL
                     4 -> BaseDanmaku.TYPE_FIX_BOTTOM
