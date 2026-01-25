@@ -29,7 +29,7 @@ import master.flame.danmaku.danmaku.model.DanmakuTimer
 import master.flame.danmaku.danmaku.model.IDanmakus
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import master.flame.danmaku.danmaku.model.android.SimpleTextCacheStuffer
-import master.flame.danmaku.ui.widget.DanmakuTextureView
+import master.flame.danmaku.ui.widget.DanmakuSurfaceView
 
 import androidx.activity.compose.BackHandler
 
@@ -41,19 +41,21 @@ fun PlayerScreen(
     onBackPressed: () -> Unit,
     viewModel: PlayerViewModel = viewModel()
 ) {
-    // Handle system back press
     BackHandler(onBack = onBackPressed)
 
     val uiState by viewModel.uiState.collectAsState()
     val danmakuParser by viewModel.danmakuParser.collectAsState()
     val context = LocalContext.current
     
-    // Create DanmakuContext with TV optimizations
+    // BBLL-Style DanmakuContext Configuration
     val danmakuContext = remember {
         DanmakuContext.create().apply {
+            // Set thick stroke style for TV visibility
+            setDanmakuStyle(DanmakuContext.DANMAKU_STYLE_STROKEN, 3.0f)
             setDuplicateMergingEnabled(true)
             setScrollSpeedFactor(1.2f)
-            setScaleTextSize(3.0f) // FORCE DEBUG SIZE: 3.0f to ensure visibility
+            setScaleTextSize(1.5f)
+            setCacheStuffer(SimpleTextCacheStuffer(), null)
         }
     }
 
@@ -80,7 +82,7 @@ fun PlayerScreen(
                 )
             }
             is PlayerUiState.Ready -> {
-                // Video Player
+                // 1. Video Layer (Bottom)
                 AndroidView(
                     factory = {
                         PlayerView(context).apply {
@@ -93,32 +95,31 @@ fun PlayerScreen(
                     onRelease = { it.player = null }
                 )
                 
-                // Danmaku Layer
+                // 2. Danmaku Layer (Top)
                 if (danmakuParser != null) {
                     androidx.compose.runtime.key(danmakuParser) {
                         AndroidView(
                             factory = {
-                                DanmakuTextureView(context).apply {
+                                DanmakuSurfaceView(context).apply {
                                     layoutParams = android.view.ViewGroup.LayoutParams(
                                         android.view.ViewGroup.LayoutParams.MATCH_PARENT,
                                         android.view.ViewGroup.LayoutParams.MATCH_PARENT
                                     )
-                                    isOpaque = false // Vital for TextureView transparency
+                                    // CRITICAL: SurfaceView layering
+                                    setZOrderMediaOverlay(true) 
+                                    holder.setFormat(android.graphics.PixelFormat.TRANSLUCENT)
                                     
                                     setCallback(object : DrawHandler.Callback {
                                         override fun prepared() {
-                                            // DFM calls this on a background thread.
-                                            // We must post to Main Thread to access ExoPlayer safely.
                                             post {
                                                 val pos = viewModel.player?.currentPosition ?: 0
-                                                android.util.Log.e("ZiliZero_Danmaku", "Prepared (TextureView). Starting at: $pos. View Size: $width x $height")
+                                                android.util.Log.e("ZiliZero_Danmaku", "BBLL-Style Start at: $pos. Size: $width x $height")
                                                 start(pos)
                                             }
                                         }
                                         override fun updateTimer(timer: DanmakuTimer?) {
-                                            // 极低频率打印计时器，确认它在走
                                             if (timer != null && timer.currMillisecond % 5000 < 50) {
-                                                android.util.Log.e("ZiliZero_Danmaku", "Timer at: ${timer.currMillisecond}")
+                                                android.util.Log.e("ZiliZero_Danmaku", "Timer: ${timer.currMillisecond}")
                                             }
                                         }
                                         override fun danmakuShown(danmaku: BaseDanmaku?) {
@@ -130,11 +131,11 @@ fun PlayerScreen(
                                 }
                             },
                             update = { view ->
-                                // 每当 Compose 重组时，强行同步一次时间
                                 val player = viewModel.player
                                 if (player != null && view.isPrepared) {
                                     if (player.isPlaying) {
                                         view.resume()
+                                        // Sync if drift > 500ms
                                         val diff = view.currentTime - player.currentPosition
                                         if (kotlin.math.abs(diff) > 500) {
                                             view.seekTo(player.currentPosition)
@@ -145,10 +146,7 @@ fun PlayerScreen(
                                 }
                             },
                             modifier = Modifier.fillMaxSize(),
-                            onRelease = { 
-                                android.util.Log.e("ZiliZero_Danmaku", "Releasing View")
-                                it.release() 
-                            }
+                            onRelease = { it.release() }
                         )
                     }
                 }
@@ -156,7 +154,6 @@ fun PlayerScreen(
         }
     }
 
-    // Handle back press to release player early or navigate back
     DisposableEffect(Unit) {
         onDispose {
             viewModel.releasePlayer()

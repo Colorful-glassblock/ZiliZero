@@ -57,12 +57,15 @@ class DanmakuParser : BaseDanmakuParser() {
                 
                 val item = mContext.mDanmakuFactory.createDanmaku(type)
                 if (item != null) {
-                    item.flags = mContext.mGlobalFlagValues // Fix NPE
+                    item.flags = mContext.mGlobalFlagValues
                     item.text = elem.content
                     item.time = elem.progress.toLong()
-                    item.textSize = 25f * (mContext.displayer.density - 0.6f)
+                    
+                    // BBLL-style scaling: Use a safe baseline (25dp -> pixels)
+                    item.textSize = 30f * (mContext.displayer.density) 
+                    
                     item.textColor = elem.color.toInt() or -0x1000000 // Alpha 255
-                    item.textShadowColor = Color.BLACK // Standard stroke
+                    item.textShadowColor = Color.BLACK
                     
                     danmakus.addItem(item)
                 }
