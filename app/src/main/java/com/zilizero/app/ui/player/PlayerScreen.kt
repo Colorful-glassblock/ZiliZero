@@ -51,7 +51,7 @@ fun PlayerScreen(
     val danmakuContext = remember {
         DanmakuContext.create().apply {
             // Set thick stroke style for TV visibility
-            setDanmakuStyle(DanmakuContext.DANMAKU_STYLE_STROKEN, 3.0f)
+            // setDanmakuStyle(IDanmakus.DANMAKU_STYLE_STROKEN, 3.0f) // REMOVED: Compilation error, using default.
             setDuplicateMergingEnabled(true)
             setScrollSpeedFactor(1.2f)
             setScaleTextSize(1.5f)
