@@ -29,7 +29,7 @@ import master.flame.danmaku.danmaku.model.DanmakuTimer
 import master.flame.danmaku.danmaku.model.IDanmakus
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import master.flame.danmaku.danmaku.model.android.SimpleTextCacheStuffer
-import master.flame.danmaku.ui.widget.DanmakuView
+import master.flame.danmaku.ui.widget.DanmakuSurfaceView
 
 import androidx.activity.compose.BackHandler
 
@@ -50,12 +50,11 @@ fun PlayerScreen(
     // Create DanmakuContext with TV optimizations
     val danmakuContext = remember {
         DanmakuContext.create().apply {
-            // setDanmakuStyle(IDanmakus.DANMAKU_STYLE_STROKEN, 2.0f) // Removed due to compilation error
+            setDanmakuStyle(IDanmakus.DANMAKU_STYLE_STROKEN, 2.0f)
             setDuplicateMergingEnabled(false)
             setScrollSpeedFactor(1.2f)
             setScaleTextSize(1.5f) // Larger text for TV
             setCacheStuffer(SimpleTextCacheStuffer(), null) // Simple cache for performance
-            // setMaximumVisibleSize(0) // Removed due to compilation error
         }
     }
 
@@ -86,7 +85,6 @@ fun PlayerScreen(
                 AndroidView(
                     factory = {
                         PlayerView(context).apply {
-                            // Video should be below Danmaku
                             setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
                             player = viewModel.player
                             useController = true
@@ -96,19 +94,21 @@ fun PlayerScreen(
                     onRelease = { it.player = null }
                 )
                 
-                // Danmaku Layer - Switched to DanmakuView (Standard View) to ensure visibility over SurfaceView
+                // Danmaku Layer - Switched to DanmakuSurfaceView with MediaOverlay Z-Order
                 if (danmakuParser != null) {
                     androidx.compose.runtime.key(danmakuParser) {
                         AndroidView(
                             factory = {
-                                DanmakuView(context).apply {
-                                    // Standard View doesn't need Z-Order config, it naturally overlays SurfaceView
+                                DanmakuSurfaceView(context).apply {
+                                    setZOrderMediaOverlay(true) // CRITICAL: Places this Surface ABOVE the video Surface
+                                    holder.setFormat(android.graphics.PixelFormat.TRANSLUCENT) // Ensure transparency
                                     
-                                    // DEBUG: Check if view is visible
-                                    this.setBackgroundColor(android.graphics.Color.parseColor("#33FF0000")) 
+                                    // DEBUG: Visual confirmation
+                                    // this.setBackgroundColor(android.graphics.Color.parseColor("#33FF0000")) 
 
                                     setCallback(object : DrawHandler.Callback {
                                         override fun prepared() {
+                                            android.util.Log.e("ZiliZero_Danmaku", "SurfaceView Prepared & Showing")
                                             start()
                                             show()
                                         }
