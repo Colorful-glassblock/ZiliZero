@@ -46,6 +46,7 @@ fun PlayerScreen(
     val uiState by viewModel.uiState.collectAsState()
     val danmakuParser by viewModel.danmakuParser.collectAsState()
     val context = LocalContext.current
+    val density = androidx.compose.ui.platform.LocalDensity.current
     
     // Create DanmakuContext with TV optimizations
     val danmakuContext = remember {
@@ -53,7 +54,11 @@ fun PlayerScreen(
             // setDanmakuStyle(IDanmakus.DANMAKU_STYLE_STROKEN, 2.0f) // Removed due to compilation error
             setDuplicateMergingEnabled(true) // ENABLED for performance (TV 4K fillrate)
             setScrollSpeedFactor(1.2f)
-            setScaleTextSize(1.5f) // Larger text for TV
+            
+            // FORCE DENSITY: Hardcode to 3.0f (xxhdpi) to prevent "Zero Size" issue
+            // If LocalDensity is weird on TV, this ensures text is rendered at a visible size.
+            setScaleTextSize(3.0f) 
+            
             // setCacheStuffer(SimpleTextCacheStuffer(), null) // REMOVED: Revert to default renderer for debugging
         }
     }

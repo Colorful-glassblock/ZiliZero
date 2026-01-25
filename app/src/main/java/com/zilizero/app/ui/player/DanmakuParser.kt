@@ -16,7 +16,7 @@ class DanmakuParser : BaseDanmakuParser() {
         
         if (dataSource is DmDataSource) {
             val reply = dataSource.data()
-            android.util.Log.e("ZiliZero_Danmaku", "PARSING START! Items: ${reply.elemsList.size}")
+            android.util.Log.e("ZiliZero_Danmaku", "PARSING START! Items: ${reply.elemsList.size}, Density: ${mContext.displayer.density}")
             
             // TEST: Inject an IMMEDIATE danmaku to verify rendering
             val testItem = mContext.mDanmakuFactory.createDanmaku(BaseDanmaku.TYPE_SCROLL_RL)
