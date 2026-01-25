@@ -51,16 +51,63 @@ fun PlayerScreen(
     val danmakuContext = remember {
         DanmakuContext.create().apply {
             setDanmakuStyle(IDanmakus.DANMAKU_STYLE_STROKEN, 2.0f)
-            setDuplicateMergingEnabled(false)
+            setDuplicateMergingEnabled(true) // ENABLED for performance (TV 4K fillrate)
             setScrollSpeedFactor(1.2f)
             setScaleTextSize(1.5f) // Larger text for TV
             setCacheStuffer(SimpleTextCacheStuffer(), null) // Simple cache for performance
         }
     }
 
+    // Create DanmakuView instance to be managed by Compose and Listeners
+    val danmakuView = remember {
+        DanmakuSurfaceView(context).apply {
+            setZOrderMediaOverlay(true) // CRITICAL: Places this Surface ABOVE the video Surface
+            holder.setFormat(android.graphics.PixelFormat.TRANSLUCENT) // Ensure transparency
+            
+            setCallback(object : DrawHandler.Callback {
+                override fun prepared() {
+                    android.util.Log.e("ZiliZero_Danmaku", "SurfaceView Prepared & Showing")
+                    start()
+                }
+                override fun updateTimer(timer: DanmakuTimer?) {}
+                override fun danmakuShown(danmaku: BaseDanmaku?) {}
+                override fun drawingFinished() {}
+            })
+        }
+    }
+
     LaunchedEffect(bvid, cid) {
         viewModel.initializePlayer()
         viewModel.loadVideo(bvid, cid)
+    }
+
+    // Bind Player Events to DanmakuView (Robust Sync)
+    val player = viewModel.player
+    if (player != null) {
+        DisposableEffect(player) {
+            val listener = object : Player.Listener {
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    if (isPlaying) {
+                        danmakuView.resume()
+                    } else {
+                        danmakuView.pause()
+                    }
+                }
+
+                override fun onPositionDiscontinuity(
+                    oldPosition: Player.PositionInfo,
+                    newPosition: Player.PositionInfo,
+                    reason: Int
+                ) {
+                    // Sync on Seek
+                    if (danmakuView.isPrepared) {
+                        danmakuView.seekTo(newPosition.contentPositionMs)
+                    }
+                }
+            }
+            player.addListener(listener)
+            onDispose { player.removeListener(listener) }
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
@@ -86,7 +133,7 @@ fun PlayerScreen(
                     factory = {
                         PlayerView(context).apply {
                             setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
-                            player = viewModel.player
+                            this.player = viewModel.player
                             useController = true
                         }
                     },
@@ -94,43 +141,14 @@ fun PlayerScreen(
                     onRelease = { it.player = null }
                 )
                 
-                // Danmaku Layer - Switched to DanmakuSurfaceView with MediaOverlay Z-Order
+                // Danmaku Layer
                 if (danmakuParser != null) {
                     androidx.compose.runtime.key(danmakuParser) {
                         AndroidView(
                             factory = {
-                                DanmakuSurfaceView(context).apply {
-                                    setZOrderMediaOverlay(true) // CRITICAL: Places this Surface ABOVE the video Surface
-                                    holder.setFormat(android.graphics.PixelFormat.TRANSLUCENT) // Ensure transparency
-                                    
-                                    // DEBUG: Visual confirmation
-                                    // this.setBackgroundColor(android.graphics.Color.parseColor("#33FF0000")) 
-
-                                    setCallback(object : DrawHandler.Callback {
-                                        override fun prepared() {
-                                            android.util.Log.e("ZiliZero_Danmaku", "SurfaceView Prepared & Showing")
-                                            start()
-                                            show()
-                                        }
-                                        override fun updateTimer(timer: DanmakuTimer?) {}
-                                        override fun danmakuShown(danmaku: BaseDanmaku?) {}
-                                        override fun drawingFinished() {}
-                                    })
+                                danmakuView.apply {
                                     prepare(danmakuParser, danmakuContext)
-                                }
-                            },
-                            update = { view ->
-                                val player = viewModel.player
-                                if (player != null) {
-                                    if (player.isPlaying) {
-                                        if (view.isPaused) view.resume()
-                                        val diff = view.currentTime - player.currentPosition
-                                        if (kotlin.math.abs(diff) > 1000) {
-                                            view.seekTo(player.currentPosition)
-                                        }
-                                    } else {
-                                        if (!view.isPaused) view.pause()
-                                    }
+                                    show()
                                 }
                             },
                             modifier = Modifier.fillMaxSize(),
